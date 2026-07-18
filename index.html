@@ -249,6 +249,10 @@
   .details-row td{background:transparent;}
   .details-card{background:linear-gradient(180deg, #fff, #fcfbf8); padding:1rem; border-radius:10px; border:1px solid var(--line-soft);}
   .toggle-details-btn{min-width:88px;}
+  .name-cell{cursor:pointer;}
+  .name-cell:focus{outline:2px solid rgba(175,138,79,.25); outline-offset:3px; border-radius:6px;}
+  .compact-hidden{display:inline;}
+  .compact-placeholder{display:none;}
 
   /* ---------- Check-in panel ---------- */
   .checkin-form{display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;}
@@ -298,6 +302,11 @@
       box-shadow:var(--shadow-sm); border:1px solid var(--line-soft); overflow:hidden;
     }
     td{display:block; width:100%; padding:.95rem 1.15rem; border:none; border-bottom:1px solid var(--line-soft);}
+    /* Mobile: hide all columns except the first (name) for compact rows */
+    tbody tr:not(.details-row) td:not(:first-child){
+      display:none;
+    }
+    tr.details-row td{display:block;}
     td:last-child{border-bottom:none; padding-top:1.1rem;}
     td[data-label]::before{
       display:block; content:attr(data-label); margin-bottom:.4rem; color:var(--gold-deep);
@@ -307,6 +316,8 @@
     .row-actions .btn{width:100%;}
     .checkin-form{flex-direction:column; align-items:stretch;}
     .checkin-form .btn-primary{width:100%;}
+    .compact-hidden{display:none;}
+    .compact-placeholder{display:inline-block;}
   }
 
   @media(max-width:560px){
@@ -343,7 +354,7 @@
       </div>
       <div class="mobile-menu-actions">
         <button id="mobileScanBtn" class="btn btn-outline btn-small">Scan Code</button>
-        <a href="https://wa.me/08022468893" target="_blank" class="btn btn-outline btn-small">WhatsApp Admin</a>
+        <a href="https://wa.me/2348022468893" target="_blank" class="btn btn-outline btn-small">WhatsApp Admin</a>
       </div>
       <div class="stats-mobile" id="mobileStats"></div>
     </div>
@@ -535,12 +546,12 @@
 
       return `
         <tr data-id="${g.id}">
-          <td data-label="Name">${escapeHtml(g.full_name || '—')}</td>
-          <td data-label="WhatsApp">${escapeHtml(g.whatsapp || '—')}</td>
-          <td data-label="Guests">${escapeHtml(String(g.guests || '1'))}</td>
-          <td data-label="Status">${statusBadge}</td>
-          <td data-label="Code">${'<span class="small-note">Hidden</span>'}</td>
-          <td data-label="Check-in">${checkinCell}</td>
+          <td data-label="Name" class="name-cell" data-id="${g.id}" role="button" tabindex="0">${escapeHtml(g.full_name || '—')}</td>
+          <td data-label="WhatsApp"><span class="compact-hidden">${escapeHtml(g.whatsapp || '—')}</span><span class="compact-placeholder small-note">Hidden</span></td>
+          <td data-label="Guests"><span class="compact-hidden">${escapeHtml(String(g.guests || '1'))}</span><span class="compact-placeholder small-note">Hidden</span></td>
+          <td data-label="Status"><span class="compact-hidden">${statusBadge}</span><span class="compact-placeholder small-note">Hidden</span></td>
+          <td data-label="Code"><span class="compact-hidden">${codeCell}</span><span class="compact-placeholder small-note">Hidden</span></td>
+          <td data-label="Check-in"><span class="compact-hidden">${checkinCell}</span><span class="compact-placeholder small-note">Hidden</span></td>
           <td data-label="Actions">
             <div class="row-actions">
               <button class="btn btn-outline btn-small toggle-details-btn" data-id="${g.id}" aria-expanded="false">Details</button>
@@ -560,6 +571,11 @@
                 <div style="display:flex; gap:.6rem; align-items:center;">
                   ${codeCell}
                 </div>
+              </div>
+              <div style="margin-top:.6rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                <div>${statusBadge}</div>
+                <div>${checkinCell}</div>
+                <div style="margin-left:auto;">${codeCell}</div>
               </div>
               <div style="margin-top:.8rem; display:flex; gap:.6rem; flex-wrap:wrap;">
                 <button class="btn btn-outline btn-small gen-code-btn" data-id="${g.id}">${g.code ? 'Regenerate' : 'Generate Code'}</button>
@@ -583,8 +599,24 @@
         const details = document.querySelector(`tr.details-row[data-for="${id}"]`);
         if (!details) return;
         const isOpen = details.style.display !== 'none';
-        details.style.display = isOpen ? 'none' : 'table-row';
+        const showDisplay = (window.innerWidth <= 760) ? 'block' : 'table-row';
+        details.style.display = isOpen ? 'none' : showDisplay;
         btn.setAttribute('aria-expanded', String(!isOpen));
+      });
+    });
+    document.querySelectorAll('.name-cell').forEach(td=>{
+      td.addEventListener('click', ()=>{
+        const id = td.dataset.id;
+        const details = document.querySelector(`tr.details-row[data-for="${id}"]`);
+        if (!details) return;
+        const isOpen = details.style.display !== 'none';
+        const showDisplay = (window.innerWidth <= 760) ? 'block' : 'table-row';
+        details.style.display = isOpen ? 'none' : showDisplay;
+        const btn = document.querySelector(`.toggle-details-btn[data-id="${id}"]`);
+        if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+      });
+      td.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); td.click(); }
       });
     });
   }
@@ -617,8 +649,32 @@
     }
 
     const message = `Hi there! This is your wedding invitation code: ${guest.code}. Please present this code at the entrance on the day of the event. We can't wait to celebrate with you!`;
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    const formatted = formatPhoneForWhatsApp(phone);
+    const fallbackFormatted = formatPhoneForWhatsApp('08022468893');
+    const sendTo = formatted || fallbackFormatted;
+    if (!sendTo){
+      alert('No valid phone number available to open WhatsApp.');
+      return;
+    }
+    const url = `https://wa.me/${sendTo}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
+  }
+
+  // Convert a local phone number into a WhatsApp-friendly international form.
+  // If the number starts with 0 (e.g. 080...), assume Nigeria (+234) and replace the leading 0.
+  // If the number already starts with country code (e.g. 234...), leave it. If number is short,
+  // also try to prefix '234' as a best-effort fallback.
+  function formatPhoneForWhatsApp(raw){
+    if (!raw) return '';
+    let p = String(raw).replace(/[^0-9]/g,'');
+    if (!p) return '';
+    if (p.startsWith('0')){
+      p = '234' + p.slice(1);
+    }
+    if (p.length <= 10){
+      p = '234' + p.replace(/^0+/, '');
+    }
+    return p;
   }
 
   // ---------- Check-in ----------
