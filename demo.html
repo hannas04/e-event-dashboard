@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Aaron & Denice — Wedding Admin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --blush:#f4e3dd; --blush-deep:#e9c9c0;
+    --sage:#9caf88; --sage-deep:#5d6b4f;
+    --ivory:#faf6f0; --gold:#b78a55; --gold-soft:#d3b787;
+    --ink:#3a352e; --ink-soft:#6b6558; --paper:#fbf8f3;
+    --ok:#5d6b4f; --err:#a34848;
+    --display:'Cormorant Garamond', serif;
+    --sans:'Jost', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--sans); background:linear-gradient(180deg, #fbf8f3 0%, #f3e8dc 35%, #ffffff 100%);
+    color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--display); color:var(--sage-deep); font-weight:600;}
+  .eyebrow{font-size:.7rem; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); font-weight:500;}
+
+  /* ---------- Login ---------- */
+  #loginScreen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg, var(--blush) 0%, var(--paper) 60%);
+    padding:1.5rem;
+  }
+  .login-card{
+    background:#fff; border:1px solid var(--gold-soft); padding:3rem 2.4rem;
+    max-width:380px; width:100%; text-align:center; border-radius:4px;
+    box-shadow:0 20px 50px -20px rgba(93,107,79,.25);
+  }
+  .login-card h1{font-size:2.2rem; margin:.4rem 0 1.6rem;}
+  .field{text-align:left; margin-bottom:1.2rem;}
+  .field label{display:block; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--sage-deep); margin-bottom:.4rem;}
+  .field input{
+    width:100%; border:1px solid rgba(93,107,79,.3); background:var(--paper);
+    padding:.7rem .8rem; font-family:var(--sans); font-size:.95rem; color:var(--ink); border-radius:3px;
+  }
+  .field input:focus{outline:none; border-color:var(--gold);}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:999px; cursor:pointer;
+    font-family:var(--sans); letter-spacing:.16em; text-transform:uppercase; font-size:.82rem;
+    padding:.9rem 1.9rem; transition:.25s ease;
+  }
+  .btn-primary{background:var(--sage-deep); color:var(--ivory); width:auto; margin-top:.6rem;}
+  .btn-primary:hover{background:#4b5940;}
+  .btn-primary:disabled{opacity:.65; cursor:wait;}
+  .btn-outline{background:transparent; border:1px solid var(--sage-deep); color:var(--sage-deep);}
+  .btn-outline:hover{background:var(--sage-deep); color:var(--ivory);}
+  .btn-small{padding:.65rem 1.2rem; font-size:.75rem;}
+  .msg{margin-top:1rem; font-size:.84rem; padding:.7rem 1rem; border-radius:4px; display:none;}
+  .msg.show{display:block;}
+  .msg.error{background:rgba(163,72,72,.1); color:var(--err); border:1px solid rgba(163,72,72,.35);}
+  .msg.success{background:rgba(93,107,79,.12); color:var(--sage-deep); border:1px solid var(--sage);}
+
+  /* ---------- App shell ---------- */
+  #app{display:block;}
+  header.topbar{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    padding:1.4rem 2rem; background:#fff; border-radius:22px; box-shadow:0 18px 45px rgba(35,36,30,.08);
+    position:sticky; top:1rem; z-index:10; margin:0 1rem 1.5rem;
+  }
+  header.topbar > div:first-child{max-width:calc(100% - 240px);}
+  header.topbar .brand{font-family:var(--display); font-size:1.6rem; color:var(--sage-deep); margin-bottom:.25rem;}
+  header.topbar .brand span{color:var(--gold); font-style:italic;}
+  header.topbar .tagline{font-size:.92rem; color:var(--ink-soft); line-height:1.55;}
+  header.topbar .header-controls{display:flex; align-items:center; justify-content:flex-end; gap:.8rem;}
+  header.topbar .header-actions{display:flex; flex-wrap:wrap; gap:.8rem; align-items:center; margin-top:0;}
+  header.topbar .header-actions a{text-decoration:none;}
+  main{max-width:1100px; margin:0 auto; padding:1rem 1.5rem 3rem;}
+
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2.4rem;}
+  .stat-card{
+    background:#fff; border-radius:18px;
+    padding:1.6rem 1.5rem; text-align:center; box-shadow:0 12px 30px rgba(55,53,47,.06);
+  }
+  .stat-card .num{font-family:var(--display); font-size:2.2rem; color:var(--sage-deep);}
+  .stat-card .lab{font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-top:.2rem;}
+
+  section.panel{
+    background:#fff; border-radius:22px; padding:2rem; margin-bottom:2rem; box-shadow:0 20px 45px rgba(35,36,30,.06);
+  }
+  section.panel h2{font-size:1.6rem; margin-bottom:1.2rem;}
+
+  .table-wrap{overflow-x:auto; background:#fff; border-radius:18px; box-shadow:0 18px 40px rgba(35,36,30,.05); border:1px solid rgba(183,138,85,.15);}
+  table{width:100%; border-collapse:collapse; font-size:.92rem; min-width:760px;}
+  th, td{padding:1rem 1.1rem; text-align:left; border-bottom:1px solid rgba(183,138,85,.18);}
+  th{font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--sage-deep);}
+  tbody tr:hover{background:rgba(156,175,132,.06);}
+  tbody tr td:first-child{font-weight:500;}
+  tr:last-child td{border-bottom:none;}
+  @media(max-width:760px){
+    header.topbar{padding:1rem; margin:0.75rem 0.75rem 1.2rem;}
+    header.topbar > div:first-child{max-width:100%;}
+    header.topbar .header-controls{width:100%; margin-top:1rem;}
+    .header-actions{display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:.75rem;}
+    .header-actions a{flex:1 1 48%; text-align:center;}
+    main{padding:1.4rem 1rem 3rem;}
+    .table-wrap{border:none; box-shadow:none;}
+    table{min-width:0;}
+    thead{display:none;}
+    tr{display:block; margin-bottom:1rem; border-radius:18px; background:#fff; box-shadow:0 12px 24px rgba(35,36,30,.08); border:1px solid rgba(183,138,85,.12); overflow:hidden;}
+    td{display:block; width:100%; padding:1rem 1.2rem; border:none; border-bottom:1px solid rgba(183,138,85,.12);}
+    td:last-child{border-bottom:none;}
+    td[data-label]::before{display:block; content:attr(data-label); margin-bottom:.35rem; color:var(--sage-deep); font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;}
+    .row-actions{justify-content:flex-start; flex-direction:column;}
+    .row-actions .btn{width:100%;}
+  }
+  @media(max-width:560px){
+    .table-wrap{padding:0 0.5rem;}
+    td{padding:1rem 1rem;}
+    .header-actions a{font-size:.78rem; padding:.75rem 1rem;}
+  }
+  .badge{
+    display:inline-block; padding:.25rem .7rem; border-radius:100px; font-size:.7rem;
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+  .badge.yes{background:rgba(93,107,79,.14); color:var(--sage-deep);}
+  .badge.no{background:rgba(163,72,72,.1); color:var(--err);}
+  .badge.checked{background:var(--gold-soft); color:#5c4526;}
+  .badge.pending{background:rgba(107,101,88,.12); color:var(--ink-soft);}
+  .code-tag{font-family:var(--display); font-size:1.1rem; letter-spacing:.06em; color:var(--gold);}
+  .row-actions{display:flex; flex-wrap:wrap; gap:.5rem;}
+  .empty-note{color:var(--ink-soft); font-size:.94rem; font-style:italic; padding:1rem 0;}
+
+  .checkin-form{display:flex; gap:.8rem; flex-wrap:wrap; align-items:flex-end;}
+  .checkin-form .field{flex:1; min-width:200px; margin-bottom:0;}
+  .checkin-form input{font-family:var(--display); font-size:1.3rem; letter-spacing:.3em; text-align:center;}
+
+  .checkin-result{
+    margin-top:1.4rem; padding:1.2rem 1.4rem; border-radius:4px; display:none;
+  }
+  .checkin-result.show{display:block;}
+  .checkin-result.ok{background:rgba(93,107,79,.1); border:1px solid var(--sage);}
+  .checkin-result.already{background:rgba(211,183,135,.18); border:1px solid var(--gold-soft);}
+  .checkin-result.fail{background:rgba(163,72,72,.08); border:1px solid rgba(163,72,72,.3);}
+  .checkin-result h3{font-size:1.3rem; margin-bottom:.3rem;}
+  .checkin-result p{color:var(--ink-soft); font-size:.88rem;}
+
+  .refresh-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;}
+  .small-note{font-size:.78rem; color:var(--ink-soft);}
+
+  @media(max-width:760px){
+    header.topbar{padding:1rem; margin:0.75rem 0.75rem 1.2rem;}
+    header.topbar > div:first-child{max-width:100%;}
+    header.topbar .header-controls{width:100%; margin-top:1rem; justify-content:flex-start;}
+    header.topbar .tagline{max-width:100%;}
+    .header-actions{display:flex; flex-wrap:wrap; width:100%; gap:.75rem; justify-content:space-between;}
+    .header-actions a{flex:1 1 48%; text-align:center;}
+    main{padding:1.4rem 1rem 3rem;}
+  }
+  @media(max-width:560px){
+    .header-actions a{font-size:.78rem; padding:.75rem 1rem;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <header class="topbar">
+    <div>
+      <div class="brand">Aaron <span>&amp;</span> Denice — Admin</div>
+      <div class="tagline">Manage RSVPs, send codes, and keep guest check-in smooth from one dashboard.</div>
+    </div>
+    <div class="header-controls">
+      <div class="header-actions">
+        <a href="#checkinSection" class="btn btn-outline btn-small">Scan Code</a>
+        <a href="https://wa.me/08022468893" target="_blank" class="btn btn-outline btn-small">WhatsApp Admin</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="statTotalRsvp">0</div><div class="lab">RSVPs Received</div></div>
+      <div class="stat-card"><div class="num" id="statConfirmedGuests">0</div><div class="lab">Confirmed Guests</div></div>
+      <div class="stat-card"><div class="num" id="statCodesSent">0</div><div class="lab">Codes Generated</div></div>
+      <div class="stat-card"><div class="num" id="statCheckedIn">0</div><div class="lab">Checked In</div></div>
+    </div>
+
+    <section class="panel">
+      <div class="refresh-row">
+        <h2 style="margin:0;">Guest List</h2>
+        <button class="btn btn-outline btn-small" id="refreshBtn">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>WhatsApp</th>
+              <th>Guests</th>
+              <th>Status</th>
+              <th>Code</th>
+              <th>Check-in</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="guestTableBody">
+            <tr><td colspan="7" class="empty-note">Loading guests…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="checkinSection">
+      <h2>Check-in / Verification</h2>
+      <p class="small-note" style="margin-bottom:1rem;">Enter the guest's 6-digit entrance code to verify and check them in.</p>
+      <div class="checkin-form">
+        <div class="field">
+          <label for="checkinCode">6-Digit Code</label>
+          <input type="text" id="checkinCode" maxlength="6" inputmode="numeric" placeholder="000000">
+        </div>
+        <button class="btn btn-primary" id="checkinBtn" style="width:auto; margin-top:0;">Verify &amp; Check In</button>
+      </div>
+      <div class="checkin-result" id="checkinResult"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ SUPABASE ============ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  /* ==========================================================
+     SUPABASE CONFIG — fill these in before use
+     See setup instructions at the bottom of this file.
+  ========================================================== */
+  const SUPABASE_URL = "https://siotnrpfbxrzzboihxll.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpb3RucnBmYnhyenpib2loeGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0Mjk4MTUsImV4cCI6MjA5OTAwNTgxNX0.c4aJHEOmguyTV-F4EpxtjyN7S3JOd6ifNWBuP5FxTSg";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const TABLE = "rsvps";
+
+  // ---------- DOM refs ----------
+  const app           = document.getElementById('app');
+  const refreshBtn    = document.getElementById('refreshBtn');
+  const guestTableBody= document.getElementById('guestTableBody');
+  const checkinCode   = document.getElementById('checkinCode');
+  const checkinBtn    = document.getElementById('checkinBtn');
+  const checkinResult = document.getElementById('checkinResult');
+
+  let guests = [];
+
+  // ---------- Load guests ----------
+  async function loadGuests(){
+    guestTableBody.innerHTML = '<tr><td colspan="7" class="empty-note">Loading guests…</td></tr>';
+    const { data, error } = await sb.from(TABLE).select('*').order('created_at', { ascending:false });
+    if (error){
+      guestTableBody.innerHTML = `<tr><td colspan="7" class="empty-note">Error loading guests: ${escapeHtml(error.message)}</td></tr>`;
+      return;
+    }
+    guests = data || [];
+    renderStats();
+    renderTable();
+  }
+
+  function renderStats(){
+    const totalRsvp = guests.length;
+    const confirmedGuests = guests
+      .filter(g => g.attending === 'yes')
+      .reduce((sum, g) => sum + guestCountFromValue(g.guests), 0);
+    const codesSent = guests.filter(g => g.code).length;
+    const checkedIn = guests.filter(g => g.checked_in).length;
+
+    document.getElementById('statTotalRsvp').textContent = totalRsvp;
+    document.getElementById('statConfirmedGuests').textContent = confirmedGuests;
+    document.getElementById('statCodesSent').textContent = codesSent;
+    document.getElementById('statCheckedIn').textContent = checkedIn;
+  }
+
+  function guestCountFromValue(val){
+    if (!val) return 0;
+    const n = parseInt(String(val).replace(/[^0-9]/g,''), 10);
+    return isNaN(n) ? 1 : n;
+  }
+
+  function renderTable(){
+    if (!guests.length){
+      guestTableBody.innerHTML = '<tr><td colspan="7" class="empty-note">No RSVPs yet.</td></tr>';
+      return;
+    }
+    guestTableBody.innerHTML = guests.map(g => {
+      const statusBadge = g.attending === 'yes'
+        ? '<span class="badge yes">Joyfully Accepts</span>'
+        : g.attending === 'no'
+          ? '<span class="badge no">Regretfully Declines</span>'
+          : '<span class="badge pending">Pending</span>';
+
+      const codeCell = g.code
+        ? `<span class="code-tag">${escapeHtml(g.code)}</span>`
+        : '<span class="small-note">—</span>';
+
+      const checkinCell = g.checked_in
+        ? '<span class="badge checked">Checked In</span>'
+        : '<span class="badge pending">Not Yet</span>';
+
+      return `
+        <tr data-id="${g.id}">
+          <td data-label="Name">${escapeHtml(g.full_name || '—')}</td>
+          <td data-label="WhatsApp">${escapeHtml(g.whatsapp || '—')}</td>
+          <td data-label="Guests">${escapeHtml(String(g.guests || '1'))}</td>
+          <td data-label="Status">${statusBadge}</td>
+          <td data-label="Code">${codeCell}</td>
+          <td data-label="Check-in">${checkinCell}</td>
+          <td data-label="Actions">
+            <div class="row-actions">
+              <button class="btn btn-outline btn-small gen-code-btn" data-id="${g.id}">${g.code ? 'Regenerate' : 'Generate Code'}</button>
+              <button class="btn btn-primary btn-small send-wa-btn" data-id="${g.id}" style="margin-top:0;" ${g.code ? '' : 'disabled'}>Send WhatsApp</button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+
+    document.querySelectorAll('.gen-code-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> generateCode(btn.dataset.id));
+    });
+    document.querySelectorAll('.send-wa-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> sendWhatsApp(btn.dataset.id));
+    });
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ---------- Generate code ----------
+  async function generateCode(id){
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const { error } = await sb.from(TABLE).update({ code }).eq('id', id);
+    if (error){
+      alert('Could not generate code: ' + error.message);
+      return;
+    }
+    await loadGuests();
+  }
+
+  // ---------- Send WhatsApp ----------
+  function sendWhatsApp(id){
+    const guest = guests.find(g => String(g.id) === String(id));
+    if (!guest || !guest.code) return;
+
+    let phone = (guest.whatsapp || '').replace(/[^0-9]/g, '');
+    if (!phone){
+      phone = '08022468893';
+    }
+
+    const message = `Hi there! This is your wedding invitation code: ${guest.code}. Please present this code at the entrance on the day of the event. We can't wait to celebrate with you!`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  }
+
+  // ---------- Check-in ----------
+  checkinCode.addEventListener('input', ()=>{
+    checkinCode.value = checkinCode.value.replace(/[^0-9]/g,'').slice(0,6);
+  });
+
+  checkinBtn.addEventListener('click', async ()=>{
+    const code = checkinCode.value.trim();
+    checkinResult.className = 'checkin-result show';
+
+    if (code.length !== 6){
+      checkinResult.classList.add('fail');
+      checkinResult.innerHTML = '<h3>Invalid Code</h3><p>Please enter a valid 6-digit code.</p>';
+      return;
+    }
+
+    const { data, error } = await sb.from(TABLE).select('*').eq('code', code).maybeSingle();
+
+    if (error || !data){
+      checkinResult.classList.add('fail');
+      checkinResult.innerHTML = '<h3>Code Not Found</h3><p>No guest matches this code. Please check and try again.</p>';
+      return;
+    }
+
+    if (data.checked_in){
+      checkinResult.classList.add('already');
+      checkinResult.innerHTML = `<h3>${escapeHtml(data.full_name)}</h3><p>This guest has already been checked in.</p>`;
+      return;
+    }
+
+    const { error: updateError } = await sb.from(TABLE)
+      .update({ checked_in: true, checked_in_at: new Date().toISOString() })
+      .eq('id', data.id);
+
+    if (updateError){
+      checkinResult.classList.add('fail');
+      checkinResult.innerHTML = `<h3>Error</h3><p>Could not check in guest: ${escapeHtml(updateError.message)}</p>`;
+      return;
+    }
+
+    checkinResult.classList.add('ok');
+    checkinResult.innerHTML = `<h3>Welcome, ${escapeHtml(data.full_name)}!</h3><p>Guests: ${escapeHtml(String(data.guests || '1'))} · Checked in successfully.</p>`;
+    checkinCode.value = '';
+    await loadGuests();
+  });
+
+  refreshBtn.addEventListener('click', loadGuests);
+
+  // ---------- Init ----------
+  app.style.display = 'block';
+  loadGuests();
+</script>
+
+<!-- ==========================================================
+SETUP INSTRUCTIONS (read before using)
+
+1. CREATE A SUPABASE PROJECT
+   - Go to https://supabase.com, create a free project.
+   - In Project Settings → API, copy the "Project URL" and the "anon public" key.
+   - Paste them into SUPABASE_URL and SUPABASE_ANON_KEY above.
+
+2. DATABASE TABLE
+   If you already have an "rsvps" table from your public wedding site
+   (full_name, whatsapp, guests, attending, notes, created_at), just add
+   two columns for this dashboard:
+
+     alter table rsvps add column code text;
+     alter table rsvps add column checked_in boolean default false;
+     alter table rsvps add column checked_in_at timestamptz;
+
+   If you are starting fresh, create the table from scratch:
+
+     create table rsvps (
+       id uuid primary key default gen_random_uuid(),
+       created_at timestamptz default now(),
+       full_name text,
+       whatsapp text,
+       guests text,
+       attending text,
+       notes text,
+       code text,
+       checked_in boolean default false,
+       checked_in_at timestamptz
+     );
+
+   For fast code look-ups, add a unique index (optional but recommended):
+     create unique index rsvps_code_idx on rsvps(code) where code is not null;
+
+3. ROW LEVEL SECURITY (RLS)
+   Enable RLS on the table:
+     alter table rsvps enable row level security;
+
+   Your public RSVP form needs to insert as an anonymous visitor:
+     create policy "Allow public insert"
+       on rsvps for insert
+       to anon
+       with check (true);
+
+   This admin dashboard needs an authenticated admin user to read and update:
+     create policy "Allow authenticated read"
+       on rsvps for select
+       to authenticated
+       using (true);
+
+     create policy "Allow authenticated update"
+       on rsvps for update
+       to authenticated
+       using (true)
+       with check (true);
+
+4. CREATE AN ADMIN LOGIN
+   - In Supabase Dashboard → Authentication → Users → "Add user", create
+     an email + password for yourself (e.g. admin@yourdomain.com).
+   - Use those credentials to sign in on this dashboard's login screen.
+   - You can add more admin users the same way if needed.
+
+5. OPEN THE FILE
+   - Just open this HTML file in a browser (or host it anywhere — it's
+     fully self-contained, no build step, no server needed).
+   - Log in, and the dashboard will load all RSVPs automatically.
+
+HOW IT WORKS
+   - "Generate Code" creates a random 6-digit code and saves it to the
+     guest's row.
+   - "Send WhatsApp" opens a pre-filled WhatsApp chat (wa.me link) with
+     the guest's entrance code — you just hit send on WhatsApp yourself,
+     nothing is sent automatically from the server.
+   - The Check-in panel looks up any code typed in, shows the guest's
+     name and confirms if it's a duplicate check-in, or marks them
+     checked in for the first time.
+=========================================================== -->
+</body>
+</html>

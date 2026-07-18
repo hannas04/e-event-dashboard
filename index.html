@@ -7,126 +7,312 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,500;9..144,600;9..144,650&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 
 <style>
   :root{
-    --blush:#f4e3dd; --blush-deep:#e9c9c0;
-    --sage:#9caf88; --sage-deep:#5d6b4f;
-    --ivory:#faf6f0; --gold:#b78a55; --gold-soft:#d3b787;
-    --ink:#3a352e; --ink-soft:#6b6558; --paper:#fbf8f3;
-    --ok:#5d6b4f; --err:#a34848;
-    --display:'Cormorant Garamond', serif;
-    --sans:'Jost', sans-serif;
+    /* ---- Token system ---- */
+    --ink:#20241e;
+    --ink-soft:#5c6357;
+    --ink-faint:#8b9184;
+    --ivory:#faf7f0;
+    --paper:#f3ede1;
+    --cloud:#fffdf9;
+    --gold:#af8a4f;
+    --gold-deep:#8f6d38;
+    --gold-soft:#e6d3a8;
+    --sage:#748267;
+    --sage-deep:#3d4834;
+    --rose:#a06a5c;
+    --rose-soft:#e9d3cb;
+    --ok:#3d4834;
+    --ok-bg:#e9ede2;
+    --err:#93493c;
+    --err-bg:#f4e4df;
+    --line:rgba(32,36,30,.12);
+    --line-soft:rgba(32,36,30,.07);
+    --shadow-sm:0 6px 16px rgba(32,30,20,.06);
+    --shadow-md:0 18px 40px rgba(32,30,20,.09);
+    --shadow-lg:0 30px 70px -20px rgba(32,30,20,.28);
+    --radius-lg:26px;
+    --radius-md:16px;
+    --radius-sm:10px;
+    --display:'Fraunces', serif;
+    --sans:'Inter', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
   }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+  }
+
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
   body{
-    font-family:var(--sans); background:var(--paper); color:var(--ink);
-    min-height:100vh; -webkit-font-smoothing:antialiased;
+    font-family:var(--sans); background:
+      radial-gradient(1200px 600px at 12% -10%, rgba(175,138,79,.10), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(116,130,103,.10), transparent 55%),
+      linear-gradient(180deg, var(--ivory) 0%, var(--paper) 100%);
+    color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
+    letter-spacing:.005em;
   }
-  h1,h2,h3{font-family:var(--display); color:var(--sage-deep); font-weight:600;}
-  .eyebrow{font-size:.7rem; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); font-weight:500;}
 
-  /* ---------- Login ---------- */
+  h1,h2,h3{font-family:var(--display); color:var(--sage-deep); font-weight:600; letter-spacing:.005em;}
+
+  .eyebrow{
+    font-family:var(--sans); font-size:.68rem; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--gold-deep); font-weight:600; display:inline-flex; align-items:center; gap:.5rem;
+  }
+  .eyebrow::before{content:''; width:14px; height:1px; background:var(--gold-deep); display:inline-block;}
+
+  /* ---------- Fade-in choreography ---------- */
+  @keyframes riseIn{
+    from{opacity:0; transform:translateY(14px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .rise{animation:riseIn .7s cubic-bezier(.2,.7,.2,1) both;}
+  .rise-1{animation-delay:.02s;}
+  .rise-2{animation-delay:.10s;}
+  .rise-3{animation-delay:.18s;}
+  .rise-4{animation-delay:.26s;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
+    border:none; border-radius:999px; cursor:pointer;
+    font-family:var(--sans); letter-spacing:.08em; text-transform:uppercase; font-weight:600; font-size:.76rem;
+    padding:.95rem 1.7rem; min-height:48px; transition:transform .22s ease, box-shadow .22s ease, background .22s ease, color .22s ease;
+    white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px) scale(.99);}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--sage-deep), #2c3527);
+    color:var(--ivory); box-shadow:0 10px 24px -8px rgba(61,72,52,.55);
+  }
+  .btn-primary:hover{box-shadow:0 14px 30px -8px rgba(61,72,52,.65); transform:translateY(-1px);}
+  .btn-primary:disabled{opacity:.6; cursor:wait; transform:none;}
+  .btn-outline{
+    background:var(--cloud); border:1px solid var(--line); color:var(--sage-deep);
+    box-shadow:var(--shadow-sm);
+  }
+  .btn-outline:hover{border-color:var(--gold); color:var(--gold-deep); transform:translateY(-1px); box-shadow:var(--shadow-md);}
+  .btn-small{padding:.7rem 1.15rem; font-size:.7rem; min-height:44px;}
+
+  /* ---------- Login (kept for future use, unused in current markup) ---------- */
   #loginScreen{
     min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(160deg, var(--blush) 0%, var(--paper) 60%);
+    background:linear-gradient(160deg, var(--gold-soft) 0%, var(--paper) 60%);
     padding:1.5rem;
   }
   .login-card{
-    background:#fff; border:1px solid var(--gold-soft); padding:3rem 2.4rem;
-    max-width:380px; width:100%; text-align:center; border-radius:4px;
-    box-shadow:0 20px 50px -20px rgba(93,107,79,.25);
+    background:var(--cloud); border:1px solid var(--line); padding:3rem 2.4rem;
+    max-width:380px; width:100%; text-align:center; border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-lg);
   }
   .login-card h1{font-size:2.2rem; margin:.4rem 0 1.6rem;}
   .field{text-align:left; margin-bottom:1.2rem;}
-  .field label{display:block; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--sage-deep); margin-bottom:.4rem;}
+  .field label{display:block; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--sage-deep); margin-bottom:.5rem; font-weight:600;}
   .field input{
-    width:100%; border:1px solid rgba(93,107,79,.3); background:var(--paper);
-    padding:.7rem .8rem; font-family:var(--sans); font-size:.95rem; color:var(--ink); border-radius:3px;
+    width:100%; border:1px solid var(--line); background:var(--ivory);
+    padding:.85rem .9rem; font-family:var(--sans); font-size:.95rem; color:var(--ink); border-radius:var(--radius-sm);
+    min-height:48px; transition:border-color .2s ease, box-shadow .2s ease;
   }
-  .field input:focus{outline:none; border-color:var(--gold);}
-  .btn{
-    display:inline-block; border:none; border-radius:100px; cursor:pointer;
-    font-family:var(--sans); letter-spacing:.16em; text-transform:uppercase; font-size:.74rem;
-    padding:.8rem 1.8rem; transition:.25s;
-  }
-  .btn-primary{background:var(--sage-deep); color:var(--ivory); width:100%; margin-top:.6rem;}
-  .btn-primary:hover{background:#4b5940;}
-  .btn-primary:disabled{opacity:.6; cursor:wait;}
-  .btn-outline{background:transparent; border:1px solid var(--sage-deep); color:var(--sage-deep);}
-  .btn-outline:hover{background:var(--sage-deep); color:var(--ivory);}
-  .btn-small{padding:.45rem 1rem; font-size:.66rem;}
-  .msg{margin-top:1rem; font-size:.84rem; padding:.7rem 1rem; border-radius:4px; display:none;}
+  .field input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 4px rgba(175,138,79,.14);}
+  .msg{margin-top:1rem; font-size:.84rem; padding:.85rem 1rem; border-radius:var(--radius-sm); display:none;}
   .msg.show{display:block;}
-  .msg.error{background:rgba(163,72,72,.1); color:var(--err); border:1px solid rgba(163,72,72,.35);}
-  .msg.success{background:rgba(93,107,79,.12); color:var(--sage-deep); border:1px solid var(--sage);}
+  .msg.error{background:var(--err-bg); color:var(--err); border:1px solid rgba(147,73,60,.25);}
+  .msg.success{background:var(--ok-bg); color:var(--ok); border:1px solid rgba(61,72,52,.22);}
 
   /* ---------- App shell ---------- */
   #app{display:block;}
+
   header.topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:1.2rem 1.8rem; background:#fff; border-bottom:1px solid rgba(183,138,85,.25);
-    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; justify-content:space-between; gap:1.2rem;
+    padding:1.5rem 2rem; background:rgba(255,253,249,.86); backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    border-radius:24px; box-shadow:var(--shadow-md); border:1px solid var(--line-soft);
+    position:sticky; top:1rem; z-index:10; margin:1rem 1rem 2rem;
   }
-  header.topbar .brand{font-family:var(--display); font-size:1.5rem; color:var(--sage-deep);}
-  header.topbar .brand span{color:var(--gold); font-style:italic;}
-  header.topbar .header-actions{display:flex; gap:.7rem; align-items:center;}
+  .brand-row{display:flex; align-items:center; gap:1rem; max-width:100%;}
+  
+  header.topbar .brand-text{min-width:0;}
+  header.topbar .brand{font-family:var(--display); font-size:1.7rem; line-height:1.1; color:var(--sage-deep); font-weight:600;}
+  header.topbar .brand span{color:var(--gold); font-style:italic; font-weight:450;}
+  header.topbar .tagline{font-size:.9rem; color:var(--ink-soft); line-height:1.5; margin-top:.3rem; max-width:38ch;}
+  header.topbar .header-controls{display:flex; align-items:center; justify-content:flex-end; gap:.8rem;}
+  header.topbar .header-actions{display:flex; flex-wrap:wrap; gap:.7rem; align-items:center; margin-top:0;}
   header.topbar .header-actions a{text-decoration:none;}
-  main{max-width:1100px; margin:0 auto; padding:2rem 1.5rem 4rem;}
+  header.topbar .brand{font-family:var(--display); font-size:1.25rem; line-height:1.1; color:var(--sage-deep); font-weight:600;}
 
-  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:2.4rem;}
+  .mobile-menu-button{
+    display:none; border:none; background:transparent; padding:0 .25rem; color:var(--sage-deep);
+    font-size:1.45rem; cursor:pointer; box-shadow:none; width:auto; height:auto;
+  }
+  .mobile-menu-button:hover{transform:none;}
+  .mobile-menu-overlay{
+    position:fixed; inset:0; background:rgba(16,18,16,.55); display:none; align-items:center; justify-content:center;
+    z-index:60; padding:1rem;
+  }
+  .mobile-menu-overlay.open{display:flex;}
+  .mobile-menu-panel{
+    width:min(100%, 640px); max-height:100%; overflow:auto;
+    background:var(--cloud); border-radius:var(--radius-lg); padding:1.5rem;
+    box-shadow:var(--shadow-lg); border:1px solid var(--line);
+  }
+  .mobile-menu-bar{display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.4rem;}
+  .mobile-menu-title{font-family:var(--display); font-size:1.35rem; color:var(--sage-deep);}
+  .mobile-menu-close{border:none; background:transparent; color:var(--ink-soft); font-size:1.4rem; cursor:pointer;}
+  .mobile-menu-actions{display:grid; gap:1rem; margin-bottom:1.5rem;}
+  .mobile-menu-actions .btn{width:100%;}
+  .stats-mobile{display:none; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem;}
+  .stats-mobile .stat-card{min-height:110px;}
+
+  main{max-width:1120px; margin:0 auto; padding:0 1.5rem 4rem;}
+
+  /* ---------- Stats ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:1.2rem;
+    margin-bottom:2.6rem;
+    align-items:stretch;
+  }
   .stat-card{
-    background:#fff; border:1px solid var(--gold-soft); border-radius:4px;
-    padding:1.4rem 1.2rem; text-align:center;
+    position:relative; background:var(--cloud); border-radius:var(--radius-md);
+    padding:1.7rem 1.6rem; text-align:left; box-shadow:var(--shadow-sm);
+    border:1px solid var(--line-soft); overflow:hidden;
+    transition:transform .25s ease, box-shadow .25s ease;
+    min-height:140px;
   }
-  .stat-card .num{font-family:var(--display); font-size:2.2rem; color:var(--sage-deep);}
-  .stat-card .lab{font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-top:.2rem;}
+  .stat-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--gold), var(--sage));
+  }
+  .stat-card:hover{transform:translateY(-3px); box-shadow:var(--shadow-md);}
+  .stat-card .num{font-family:var(--mono); font-size:2.35rem; font-weight:600; color:var(--sage-deep); line-height:1;}
+  .stat-card .lab{font-size:.68rem; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-soft); margin-top:.6rem; font-weight:600;}
 
+  /* ---------- Panels ---------- */
   section.panel{
-    background:#fff; border:1px solid var(--gold-soft); border-radius:4px;
-    padding:1.8rem; margin-bottom:2rem;
+    background:var(--cloud); border-radius:var(--radius-lg); padding:2.2rem;
+    margin-bottom:2rem; box-shadow:var(--shadow-md); border:1px solid var(--line-soft);
   }
-  section.panel h2{font-size:1.5rem; margin-bottom:1.2rem;}
+  section.panel h2{font-size:1.65rem; margin-bottom:.2rem;}
+  .panel-sub{color:var(--ink-soft); font-size:.88rem; margin-bottom:1.4rem;}
 
-  .table-wrap{overflow-x:auto;}
-  table{width:100%; border-collapse:collapse; font-size:.88rem; min-width:760px;}
-  th, td{padding:.75rem .6rem; text-align:left; border-bottom:1px solid rgba(183,138,85,.18); white-space:nowrap;}
-  th{font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--sage-deep);}
+  .refresh-row{display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; margin-bottom:1.4rem; flex-wrap:wrap;}
+  .refresh-row .heading-block h2{margin-bottom:.3rem;}
+  .small-note{font-size:.78rem; color:var(--ink-faint);}
+
+  /* ---------- Table ---------- */
+  .table-wrap{
+    overflow-x:auto; background:var(--cloud); border-radius:var(--radius-md);
+    box-shadow:var(--shadow-sm); border:1px solid var(--line-soft);
+  }
+  table{width:100%; border-collapse:collapse; font-size:.92rem; min-width:780px;}
+  th, td{padding:1.05rem 1.15rem; text-align:left; border-bottom:1px solid var(--line-soft);}
+  th{
+    font-size:.68rem; letter-spacing:.13em; text-transform:uppercase; color:var(--sage-deep);
+    font-weight:700; background:linear-gradient(180deg, rgba(230,211,168,.28), transparent);
+  }
+  tbody tr{transition:background .18s ease;}
+  tbody tr:hover{background:rgba(175,138,79,.05);}
+  tbody tr td:first-child{font-weight:600; font-family:var(--display); font-size:1.02rem; color:var(--ink);}
   tr:last-child td{border-bottom:none;}
-  .badge{
-    display:inline-block; padding:.25rem .7rem; border-radius:100px; font-size:.7rem;
-    letter-spacing:.06em; text-transform:uppercase;
-  }
-  .badge.yes{background:rgba(93,107,79,.14); color:var(--sage-deep);}
-  .badge.no{background:rgba(163,72,72,.1); color:var(--err);}
-  .badge.checked{background:var(--gold-soft); color:#5c4526;}
-  .badge.pending{background:rgba(107,101,88,.12); color:var(--ink-soft);}
-  .code-tag{font-family:var(--display); font-size:1.1rem; letter-spacing:.06em; color:var(--gold);}
-  .row-actions{display:flex; gap:.4rem;}
-  .empty-note{color:var(--ink-soft); font-size:.88rem; font-style:italic; padding:1rem 0;}
 
-  .checkin-form{display:flex; gap:.8rem; flex-wrap:wrap; align-items:flex-end;}
-  .checkin-form .field{flex:1; min-width:200px; margin-bottom:0;}
-  .checkin-form input{font-family:var(--display); font-size:1.3rem; letter-spacing:.3em; text-align:center;}
+  .empty-note{color:var(--ink-soft); font-size:.94rem; font-style:italic; padding:1.6rem 0; text-align:center;}
+
+  /* ---------- Badges ---------- */
+  .badge{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.34rem .8rem; border-radius:100px; font-size:.68rem; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase; border:1px solid transparent;
+  }
+  .badge::before{content:''; width:6px; height:6px; border-radius:50%; background:currentColor; flex:none;}
+  .badge.yes{background:var(--ok-bg); color:var(--ok); border-color:rgba(61,72,52,.18);}
+  .badge.no{background:var(--err-bg); color:var(--err); border-color:rgba(147,73,60,.18);}
+  .badge.checked{background:linear-gradient(120deg, var(--gold-soft), #f1e4c4); color:#6b4f22; border-color:rgba(175,138,79,.35);}
+  .badge.pending{background:#efece3; color:var(--ink-soft); border-color:var(--line-soft);}
+
+  /* ---------- Code tag (ticket-stub signature element) ---------- */
+  .code-tag{
+    position:relative; display:inline-flex; align-items:center;
+    font-family:var(--mono); font-size:1rem; font-weight:600; letter-spacing:.14em; color:var(--gold-deep);
+    background:linear-gradient(120deg, #fffdf7, var(--gold-soft) 250%);
+    padding:.5rem .9rem .5rem 1.05rem; border-radius:8px;
+    border:1px dashed rgba(175,138,79,.55);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.6);
+  }
+
+  .row-actions{display:flex; flex-wrap:wrap; gap:.55rem;}
+
+  .details-row td{background:transparent;}
+  .details-card{background:linear-gradient(180deg, #fff, #fcfbf8); padding:1rem; border-radius:10px; border:1px solid var(--line-soft);}
+  .toggle-details-btn{min-width:88px;}
+
+  /* ---------- Check-in panel ---------- */
+  .checkin-form{display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;}
+  .checkin-form .field{flex:1; min-width:220px; margin-bottom:0;}
+  .checkin-form input{
+    font-family:var(--mono); font-size:1.5rem; letter-spacing:.55em; text-align:center;
+    padding-left:1.1em; /* optical centering against letter-spacing */
+  }
+  .checkin-form .btn-primary{width:auto;}
 
   .checkin-result{
-    margin-top:1.4rem; padding:1.2rem 1.4rem; border-radius:4px; display:none;
+    margin-top:1.6rem; padding:1.5rem 1.6rem; border-radius:var(--radius-md); display:none;
+    position:relative; overflow:hidden;
   }
-  .checkin-result.show{display:block;}
-  .checkin-result.ok{background:rgba(93,107,79,.1); border:1px solid var(--sage);}
-  .checkin-result.already{background:rgba(211,183,135,.18); border:1px solid var(--gold-soft);}
-  .checkin-result.fail{background:rgba(163,72,72,.08); border:1px solid rgba(163,72,72,.3);}
-  .checkin-result h3{font-size:1.3rem; margin-bottom:.3rem;}
-  .checkin-result p{color:var(--ink-soft); font-size:.88rem;}
+  .checkin-result.show{display:block; animation:riseIn .4s ease both;}
+  .checkin-result::before{
+    content:''; position:absolute; top:0; bottom:0; left:0; width:6px;
+  }
+  .checkin-result.ok{background:var(--ok-bg); border:1px solid rgba(61,72,52,.22);}
+  .checkin-result.ok::before{background:var(--sage-deep);}
+  .checkin-result.already{background:linear-gradient(120deg, #fbf3e2, #f4ecd8); border:1px solid rgba(175,138,79,.3);}
+  .checkin-result.already::before{background:var(--gold);}
+  .checkin-result.fail{background:var(--err-bg); border:1px solid rgba(147,73,60,.25);}
+  .checkin-result.fail::before{background:var(--err);}
+  .checkin-result h3{font-size:1.4rem; margin-bottom:.35rem;}
+  .checkin-result p{color:var(--ink-soft); font-size:.9rem;}
 
-  .refresh-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;}
-  .small-note{font-size:.78rem; color:var(--ink-soft);}
+  /* ---------- Mobile ---------- */
+  @media(max-width:760px){
+    header.topbar{padding:1.2rem; margin:.75rem .75rem 1.4rem; border-radius:20px;}
+    .brand-row{width:100%;}
+    header.topbar .tagline{max-width:none;}
+    header.topbar .header-controls{width:100%; margin-top:.2rem; justify-content:space-between;}
+    .header-actions{display:none;}
+    .mobile-menu-button{display:inline-flex;}
+    main{padding:0 1rem 3.5rem;}
+    section.panel{padding:1.5rem 1.25rem; border-radius:20px;}
+    .stats{display:none;}
+    .stats-mobile{display:grid;}
+
+    .table-wrap{border:none; box-shadow:none; background:transparent;}
+    table{min-width:0;}
+    thead{display:none;}
+    tbody{display:flex; flex-direction:column; gap:1rem;}
+    tr{
+      display:block; border-radius:18px; background:var(--cloud);
+      box-shadow:var(--shadow-sm); border:1px solid var(--line-soft); overflow:hidden;
+    }
+    td{display:block; width:100%; padding:.95rem 1.15rem; border:none; border-bottom:1px solid var(--line-soft);}
+    td:last-child{border-bottom:none; padding-top:1.1rem;}
+    td[data-label]::before{
+      display:block; content:attr(data-label); margin-bottom:.4rem; color:var(--gold-deep);
+      font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    }
+    .row-actions{flex-direction:column;}
+    .row-actions .btn{width:100%;}
+    .checkin-form{flex-direction:column; align-items:stretch;}
+    .checkin-form .btn-primary{width:100%;}
+  }
 
   @media(max-width:560px){
-    header.topbar{padding:1rem;}
-    main{padding:1.4rem 1rem 3rem;}
+    .header-actions a{font-size:.72rem; padding:.85rem 1rem;}
+    .stat-card .num{font-size:2rem;}
+    .checkin-form input{letter-spacing:.4em; font-size:1.3rem;}
   }
 </style>
 </head>
@@ -134,25 +320,49 @@
 
 <!-- ============ APP ============ -->
 <div id="app">
-  <header class="topbar">
-    <div class="brand">Aaron <span>&amp;</span> Denice — Admin</div>
-    <div class="header-actions">
-      <a href="#checkinSection" class="btn btn-outline btn-small">Scan Code</a>
-      <a href="https://wa.me/08022468893" target="_blank" class="btn btn-outline btn-small">WhatsApp Admin</a>
+  <header class="topbar rise rise-1">
+    <div class="brand-row">
+      <div class="brand-text">
+        <div class="brand">Aaron <span>&amp;</span> Denice — Admin</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <div class="header-actions">
+        <!-- <a href="#checkinSection" class="btn btn-outline btn-small">Scan Code</a> -->
+        <!-- <a href="https://wa.me/08022468893" target="_blank" class="btn btn-outline btn-small">WhatsApp Admin</a> -->
+      </div>
+      <div id="mobileMenuButton" class="mobile-menu-button" role="button" tabindex="0" aria-label="Open menu">☰</div>
     </div>
   </header>
 
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" aria-hidden="true">
+    <div class="mobile-menu-panel">
+      <div class="mobile-menu-bar">
+        <div class="mobile-menu-title">Dashboard Menu</div>
+        <button id="mobileMenuClose" class="mobile-menu-close" aria-label="Close menu">✕</button>
+      </div>
+      <div class="mobile-menu-actions">
+        <button id="mobileScanBtn" class="btn btn-outline btn-small">Scan Code</button>
+        <a href="https://wa.me/08022468893" target="_blank" class="btn btn-outline btn-small">WhatsApp Admin</a>
+      </div>
+      <div class="stats-mobile" id="mobileStats"></div>
+    </div>
+  </div>
+
   <main>
-    <div class="stats">
+    <div class="stats rise rise-2">
       <div class="stat-card"><div class="num" id="statTotalRsvp">0</div><div class="lab">RSVPs Received</div></div>
       <div class="stat-card"><div class="num" id="statConfirmedGuests">0</div><div class="lab">Confirmed Guests</div></div>
       <div class="stat-card"><div class="num" id="statCodesSent">0</div><div class="lab">Codes Generated</div></div>
       <div class="stat-card"><div class="num" id="statCheckedIn">0</div><div class="lab">Checked In</div></div>
     </div>
 
-    <section class="panel">
+    <section class="panel rise rise-3">
       <div class="refresh-row">
-        <h2 style="margin:0;">Guest List</h2>
+        <div class="heading-block">
+          <span class="eyebrow">Guest Book</span>
+          <h2>Guest List</h2>
+        </div>
         <button class="btn btn-outline btn-small" id="refreshBtn">Refresh</button>
       </div>
       <div class="table-wrap">
@@ -175,15 +385,16 @@
       </div>
     </section>
 
-    <section class="panel" id="checkinSection">
-      <h2>Check-in / Verification</h2>
-      <p class="small-note" style="margin-bottom:1rem;">Enter the guest's 6-digit entrance code to verify and check them in.</p>
+    <section class="panel rise rise-4" id="checkinSection">
+      <span class="eyebrow">Entrance Desk</span>
+      <h2 style="margin-top:.3rem;">Check-in &amp; Verification</h2>
+      <p class="panel-sub" style="margin-top:.4rem;">Enter the guest's 6-digit entrance code to verify and check them in.</p>
       <div class="checkin-form">
         <div class="field">
           <label for="checkinCode">6-Digit Code</label>
           <input type="text" id="checkinCode" maxlength="6" inputmode="numeric" placeholder="000000">
         </div>
-        <button class="btn btn-primary" id="checkinBtn" style="width:auto; margin-top:0;">Verify &amp; Check In</button>
+        <button class="btn btn-primary" id="checkinBtn">Verify &amp; Check In</button>
       </div>
       <div class="checkin-result" id="checkinResult"></div>
     </section>
@@ -210,8 +421,63 @@
   const checkinCode   = document.getElementById('checkinCode');
   const checkinBtn    = document.getElementById('checkinBtn');
   const checkinResult = document.getElementById('checkinResult');
+  const mobileMenuButton = document.getElementById('mobileMenuButton');
+  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  const mobileMenuClose = document.getElementById('mobileMenuClose');
+  const mobileScanBtn = document.getElementById('mobileScanBtn');
+  const mobileStats = document.getElementById('mobileStats');
 
   let guests = [];
+
+  if (mobileMenuButton){
+    mobileMenuButton.addEventListener('click', openMobileMenu);
+  }
+  if (mobileMenuClose){
+    mobileMenuClose.addEventListener('click', closeMobileMenu);
+  }
+  if (mobileMenuOverlay){
+    mobileMenuOverlay.addEventListener('click', (event)=>{
+      if (event.target === mobileMenuOverlay) closeMobileMenu();
+    });
+  }
+  if (mobileScanBtn){
+    mobileScanBtn.addEventListener('click', ()=>{
+      closeMobileMenu();
+      document.getElementById('checkinSection').scrollIntoView({ behavior:'smooth' });
+    });
+  }
+
+  function openMobileMenu(){
+    mobileMenuOverlay.classList.add('open');
+    mobileMenuOverlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeMobileMenu(){
+    mobileMenuOverlay.classList.remove('open');
+    mobileMenuOverlay.setAttribute('aria-hidden', 'true');
+  }
+
+  function renderMobileStats(totalRsvp, confirmedGuests, codesSent, checkedIn){
+    if (!mobileStats) return;
+    mobileStats.innerHTML = `
+      <div class="stat-card">
+        <div class="num">${totalRsvp}</div>
+        <div class="lab">RSVPs Received</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${confirmedGuests}</div>
+        <div class="lab">Confirmed Guests</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${codesSent}</div>
+        <div class="lab">Codes Generated</div>
+      </div>
+      <div class="stat-card">
+        <div class="num">${checkedIn}</div>
+        <div class="lab">Checked In</div>
+      </div>
+    `;
+  }
 
   // ---------- Load guests ----------
   async function loadGuests(){
@@ -238,6 +504,7 @@
     document.getElementById('statConfirmedGuests').textContent = confirmedGuests;
     document.getElementById('statCodesSent').textContent = codesSent;
     document.getElementById('statCheckedIn').textContent = checkedIn;
+    renderMobileStats(totalRsvp, confirmedGuests, codesSent, checkedIn);
   }
 
   function guestCountFromValue(val){
@@ -268,16 +535,37 @@
 
       return `
         <tr data-id="${g.id}">
-          <td>${escapeHtml(g.full_name || '—')}</td>
-          <td>${escapeHtml(g.whatsapp || '—')}</td>
-          <td>${escapeHtml(String(g.guests || '1'))}</td>
-          <td>${statusBadge}</td>
-          <td>${codeCell}</td>
-          <td>${checkinCell}</td>
-          <td>
+          <td data-label="Name">${escapeHtml(g.full_name || '—')}</td>
+          <td data-label="WhatsApp">${escapeHtml(g.whatsapp || '—')}</td>
+          <td data-label="Guests">${escapeHtml(String(g.guests || '1'))}</td>
+          <td data-label="Status">${statusBadge}</td>
+          <td data-label="Code">${'<span class="small-note">Hidden</span>'}</td>
+          <td data-label="Check-in">${checkinCell}</td>
+          <td data-label="Actions">
             <div class="row-actions">
-              <button class="btn btn-outline btn-small gen-code-btn" data-id="${g.id}">${g.code ? 'Regenerate' : 'Generate Code'}</button>
-              <button class="btn btn-primary btn-small send-wa-btn" data-id="${g.id}" style="margin-top:0;" ${g.code ? '' : 'disabled'}>Send WhatsApp</button>
+              <button class="btn btn-outline btn-small toggle-details-btn" data-id="${g.id}" aria-expanded="false">Details</button>
+            </div>
+          </td>
+        </tr>
+        <tr class="details-row" data-for="${g.id}" style="display:none;">
+          <td colspan="7">
+            <div class="details-card">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                <div>
+                  <strong>${escapeHtml(g.full_name || '—')}</strong>
+                  <div style="margin-top:.45rem; color:var(--ink-soft); font-size:.92rem;">
+                    ${escapeHtml(g.whatsapp || '—')} · Guests: ${escapeHtml(String(g.guests || '1'))}
+                  </div>
+                </div>
+                <div style="display:flex; gap:.6rem; align-items:center;">
+                  ${codeCell}
+                </div>
+              </div>
+              <div style="margin-top:.8rem; display:flex; gap:.6rem; flex-wrap:wrap;">
+                <button class="btn btn-outline btn-small gen-code-btn" data-id="${g.id}">${g.code ? 'Regenerate' : 'Generate Code'}</button>
+                <button class="btn btn-primary btn-small send-wa-btn" data-id="${g.id}" ${g.code ? '' : 'disabled'}>Send WhatsApp</button>
+              </div>
+              <div style="margin-top:.8rem; color:var(--ink-soft); font-size:.9rem;"><strong>Notes:</strong> ${escapeHtml(g.notes || '—')}</div>
             </div>
           </td>
         </tr>`;
@@ -288,6 +576,16 @@
     });
     document.querySelectorAll('.send-wa-btn').forEach(btn=>{
       btn.addEventListener('click', ()=> sendWhatsApp(btn.dataset.id));
+    });
+    document.querySelectorAll('.toggle-details-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.id;
+        const details = document.querySelector(`tr.details-row[data-for="${id}"]`);
+        if (!details) return;
+        const isOpen = details.style.display !== 'none';
+        details.style.display = isOpen ? 'none' : 'table-row';
+        btn.setAttribute('aria-expanded', String(!isOpen));
+      });
     });
   }
 
@@ -313,8 +611,12 @@
     const guest = guests.find(g => String(g.id) === String(id));
     if (!guest || !guest.code) return;
 
-    const phone = (guest.whatsapp || '').replace(/[^0-9]/g, '');
-    const message = `Dear ${guest.full_name}, here is your entrance code for the wedding: ${guest.code}. Please show this at the entrance. Thank you!`;
+    let phone = (guest.whatsapp || '').replace(/[^0-9]/g, '');
+    if (!phone){
+      phone = '08022468893';
+    }
+
+    const message = `Hi there! This is your wedding invitation code: ${guest.code}. Please present this code at the entrance on the day of the event. We can't wait to celebrate with you!`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   }
